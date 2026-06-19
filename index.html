@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TALK:TALK — AI 영어 스피치 교실</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue: #4A90E2;
+  --blue-dark: #2B6CB0;
+  --green: #48BB78;
+  --green-dark: #276749;
+  --orange: #ED8936;
+  --purple: #9F7AEA;
+  --red: #FC8181;
+  --yellow: #F6E05E;
+  --bg: #EBF8FF;
+  --card: #FFFFFF;
+  --text: #2D3748;
+  --text-soft: #718096;
+  --border: #BEE3F8;
+  --radius: 16px;
+  --shadow: 0 4px 20px rgba(74,144,226,0.13);
+}
+
+body {
+  font-family: 'Segoe UI', 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* ── HEADER ── */
+.header {
+  background: linear-gradient(135deg, #2B6CB0, #4A90E2, #48BB78);
+  color: #fff;
+  text-align: center;
+  padding: 20px 16px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+.header-title {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.header-title span { color: #F6E05E; }
+.header-sub { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+
+/* ── API KEY BAR ── */
+.api-bar {
+  background: #FFFDE7;
+  border-bottom: 2px solid #F6E05E;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.api-bar label { font-size: 12px; font-weight: 700; color: #744210; white-space: nowrap; }
+.api-bar input {
+  flex: 1;
+  min-width: 200px;
+  border: 1.5px solid #F6AD55;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-family: monospace;
+  outline: none;
+  background: #fff;
+}
+.api-bar input:focus { border-color: #ED8936; }
+.api-bar-hint { font-size: 11px; color: #975A16; width: 100%; }
+
+/* ── MAIN ── */
+.main { max-width: 640px; margin: 0 auto; padding: 16px; }
+
+/* ── STEP CARD ── */
+.step-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #EBF8FF;
+  cursor: pointer;
+  user-select: none;
+}
+.step-badge {
+  background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.step-badge.active { background: linear-gradient(135deg, var(--green), var(--green-dark)); }
+.step-badge.done { background: #CBD5E0; }
+.step-title { font-size: 15px; font-weight: 700; flex: 1; }
+.step-icon { font-size: 22px; }
+.step-body { padding: 16px 18px; }
+.step-body.hidden { display: none; }
+
+/* ── MODE TOGGLE ── */
+.mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: #F7FAFC;
+  border-radius: 14px;
+  padding: 6px;
+  margin-bottom: 16px;
+}
+.mode-btn {
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  padding: 12px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  line-height: 1.4;
+}
+.mode-btn .m-emoji { font-size: 18px; display: block; margin-bottom: 2px; }
+.mode-btn.active {
+  background: #fff;
+  color: var(--blue-dark);
+  box-shadow: 0 2px 8px rgba(74,144,226,0.25);
+}
+
+/* ── TOPIC CHIPS ── */
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.topic-chip {
+  padding: 12px 10px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #F7FAFC;
+  transition: all 0.15s;
+  color: var(--text);
+  text-align: left;
+  line-height: 1.4;
+}
+.topic-chip:hover { border-color: var(--blue); background: #EBF8FF; }
+.topic-chip.selected { border-color: var(--blue); background: var(--blue); color: #fff; }
+.topic-chip .t-emoji { font-size: 18px; display: block; margin-bottom: 3px; }
+
+/* ── UNIT (TEXTBOOK) GRID ── */
+.unit-semester-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--blue-dark);
+  margin: 4px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.unit-semester-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.unit-chip {
+  padding: 10px 10px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #F7FAFC;
+  transition: all 0.15s;
+  color: var(--text);
+  text-align: left;
+  line-height: 1.35;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.unit-chip:hover { border-color: var(--blue); background: #EBF8FF; }
+.unit-chip.selected { border-color: var(--blue); background: var(--blue); color: #fff; }
+.unit-chip .u-badge {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--blue-dark);
+  background: #fff;
+  border-radius: 20px;
+  padding: 1px 8px;
+  width: fit-content;
+}
+.unit-chip.selected .u-badge { background: rgba(255,255,255,0.25); color: #fff; }
+.unit-chip.review { border-style: dashed; }
+.unit-chip .u-emoji { font-size: 16px; }
+
+/* ── EXAMPLE BOX ── */
+.example-box {
+  background: linear-gradient(135deg, #EBF8FF, #E6FFFA);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: none;
+}
+.example-box.show { display: block; }
+.example-label { font-size: 11px; font-weight: 700; color: var(--blue-dark); margin-bottom: 6px; text-transform: uppercase; }
+.example-prompt { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.5; }
+.example-sentences { font-size: 13px; color: var(--text-soft); line-height: 1.8; }
+.example-sentence { background: #fff; border-radius: 8px; padding: 6px 10px; margin: 4px 0; border-left: 3px solid var(--blue); }
+.goal-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.goal-chip {
+  background: var(--blue);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+/* ── RECORDING ── */
+.rec-center { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 8px 0; }
+.rec-btn {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #FC8181, #E53E3E);
+  color: #fff;
+  font-size: 32px;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(229,62,62,0.35);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rec-btn:hover { transform: scale(1.06); }
+.rec-btn.on { animation: pulse-rec 1.2s ease-in-out infinite; }
+@keyframes pulse-rec {
+  0%,100% { box-shadow: 0 6px 24px rgba(229,62,62,0.4), 0 0 0 0 rgba(229,62,62,0.25); }
+  50% { box-shadow: 0 6px 24px rgba(229,62,62,0.4), 0 0 0 14px rgba(229,62,62,0); }
+}
+.rec-timer {
+  font-size: 30px;
+  font-weight: 900;
+  color: #E53E3E;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+  min-height: 36px;
+}
+.rec-hint { font-size: 13px; color: var(--text-soft); text-align: center; }
+
+.transcript-area {
+  background: #F7FAFC;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  min-height: 70px;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.7;
+  margin-top: 12px;
+}
+.t-placeholder { color: #A0AEC0; font-style: italic; }
+
+.audio-section { margin-top: 12px; display: none; }
+.audio-section.show { display: block; }
+audio { width: 100%; margin-bottom: 10px; accent-color: var(--blue); }
+.btn-row { display: flex; gap: 8px; }
+
+/* ── BUTTONS ── */
+.btn {
+  flex: 1;
+  padding: 12px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+  font-family: inherit;
+  text-align: center;
+}
+.btn-blue { background: var(--blue); color: #fff; }
+.btn-blue:hover { background: var(--blue-dark); }
+.btn-green { background: var(--green); color: #fff; }
+.btn-green:hover { background: var(--green-dark); }
+.btn-outline { background: #fff; border-color: var(--blue); color: var(--blue); }
+.btn-outline:hover { background: var(--blue); color: #fff; }
+.btn-outline-red { background: #fff; border-color: #FC8181; color: #E53E3E; }
+.btn-outline-red:hover { background: #FC8181; color: #fff; }
+.btn-full { width: 100%; flex: none; margin-top: 12px; }
+.btn-lg { padding: 15px; font-size: 16px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── SELF EVAL ── */
+.eval-list { display: flex; flex-direction: column; gap: 14px; }
+.eval-item {}
+.eval-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.eval-item-label { font-size: 14px; font-weight: 700; }
+.eval-item-desc { font-size: 11px; color: var(--text-soft); }
+.stars { display: flex; gap: 6px; }
+.star {
+  font-size: 28px;
+  cursor: pointer;
+  opacity: 0.25;
+  transition: all 0.1s;
+  border: none;
+  background: none;
+  line-height: 1;
+  padding: 0;
+}
+.star.on { opacity: 1; }
+.star:hover { transform: scale(1.2); }
+.score-label { font-size: 12px; font-weight: 600; color: var(--blue); min-width: 70px; text-align: right; }
+
+/* ── AI FEEDBACK ── */
+.ai-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  color: var(--text-soft);
+  font-size: 14px;
+}
+.spinner {
+  width: 26px; height: 26px;
+  border: 3px solid #BEE3F8;
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ai-bubble {
+  background: linear-gradient(135deg, #EBF8FF 0%, #E6FFFA 100%);
+  border-radius: 0 18px 18px 18px;
+  padding: 18px 20px;
+  position: relative;
+  margin-top: 8px;
+}
+.ai-bubble::before {
+  content: '🤖';
+  font-size: 24px;
+  position: absolute;
+  top: -14px;
+  left: 10px;
+}
+
+.ai-score-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+.ai-score-big {
+  font-size: 42px;
+  font-weight: 900;
+  color: var(--blue);
+  line-height: 1;
+}
+.ai-score-info { flex: 1; }
+.ai-score-label { font-size: 11px; color: var(--text-soft); }
+.ai-score-bar-wrap { background: #EBF8FF; border-radius: 20px; height: 8px; margin-top: 6px; overflow: hidden; }
+.ai-score-bar { height: 100%; border-radius: 20px; background: linear-gradient(to right, var(--blue), var(--green)); transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+
+.ai-section { margin-bottom: 14px; }
+.ai-section:last-child { margin-bottom: 0; }
+.ai-section-title {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ai-section-title.good { color: #276749; }
+.ai-section-title.improve { color: #744210; }
+.ai-section-title.phrase { color: #553C9A; }
+.ai-section-title.cheer { color: #C05621; }
+.ai-section-body { font-size: 14px; line-height: 1.75; color: var(--text); }
+.ai-phrase-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.ai-phrase {
+  background: #fff;
+  border: 2px solid #9F7AEA;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #553C9A;
+}
+.ai-cheer-box {
+  background: linear-gradient(135deg, #FFFDE7, #FEF3C7);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #744210;
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* ── BACK BTN ── */
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.back-btn:hover { text-decoration: underline; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #2D3748;
+  color: #fff;
+  padding: 11px 22px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 999;
+  transition: transform 0.3s;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── COUNTER ── */
+.attempt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-soft);
+  margin-top: 8px;
+}
+.attempt-dots { display: flex; gap: 4px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: #CBD5E0; }
+.dot.done { background: var(--green); }
+
+@media(max-width:480px) {
+  .topic-grid { grid-template-columns: 1fr; }
+  .unit-grid { grid-template-columns: 1fr; }
+  .btn-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-title">TALK<span>:</span>TALK</div>
+  <div class="header-sub">✨ 초등 5학년 영어 말하기 — AI 스피치 코치</div>
+</div>
+
+<!-- API KEY (hidden) -->
+<div style="display:none">
+  <label>🔑 Claude API Key</label>
+  <input type="password" id="apiKey" placeholder="sk-ant-api03-... (교사가 입력)">
+  <div class="api-bar-hint">학생은 비워도 괜찮아요 — 선생님이 미리 설정해 두면 돼요!</div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1: 주제 선택 -->
+  <div class="step-card" id="card1">
+    <div class="step-header" onclick="toggleStep(1)">
+      <div class="step-icon">🗂️</div>
+      <div class="step-title">오늘 말해볼 주제를 골라봐!</div>
+      <div class="step-badge active" id="badge1">STEP 1</div>
+    </div>
+    <div class="step-body" id="body1">
+
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeBtnFree" onclick="setMode('free')">
+          <span class="m-emoji">🗣️</span>자유 주제
+        </button>
+        <button class="mode-btn" id="modeBtnUnit" onclick="setMode('unit')">
+          <span class="m-emoji">📘</span>교과서 단원 복습
+        </button>
+      </div>
+
+      <div class="topic-grid" id="topicGrid"></div>
+      <div class="topic-grid" id="unitGrid" style="display:none"></div>
+
+      <div class="example-box" id="exampleBox">
+        <div class="example-label" id="exLabel">🎯 오늘의 말하기 과제</div>
+        <div class="example-prompt" id="exPrompt"></div>
+        <div id="exSentences"></div>
+        <div class="goal-chips" id="goalChips"></div>
+      </div>
+      <button class="btn btn-blue btn-full btn-lg" id="btn1" onclick="goStep2()" disabled>
+        다음 단계로 ▶
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 2: 말하기 -->
+  <div class="step-card" id="card2">
+    <div class="step-header" onclick="toggleStep(2)">
+      <div class="step-icon">🎤</div>
+      <div class="step-title">이제 영어로 말해봐!</div>
+      <div class="step-badge" id="badge2">STEP 2</div>
+    </div>
+    <div class="step-body hidden" id="body2">
+      <div class="rec-center">
+        <div class="rec-timer" id="recTimer">00:00</div>
+        <button class="rec-btn" id="recBtn" onclick="toggleRec()">🎤</button>
+        <div class="rec-hint" id="recHint">버튼을 누르고 영어로 말해봐! 🗣️</div>
+      </div>
+      <div class="attempt-row">
+        <span>도전 횟수</span>
+        <div class="attempt-dots">
+          <div class="dot" id="d1"></div>
+          <div class="dot" id="d2"></div>
+          <div class="dot" id="d3"></div>
+        </div>
+      </div>
+      <div class="transcript-area" id="transcriptArea">
+        <span class="t-placeholder">여기에 네가 말한 내용이 나타날 거야 ✨</span>
+      </div>
+      <div class="audio-section" id="audioSection">
+        <audio id="audioPlayer" controls></audio>
+        <div class="btn-row">
+          <button class="btn btn-outline-red" onclick="retryRec()">🔄 다시 말하기</button>
+          <button class="btn btn-green" onclick="goStep3()">✅ 자기평가하기 →</button>
+        </div>
+      </div>
+      <button class="back-btn" onclick="goStep1()">← 주제 바꾸기</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: 자기평가 -->
+  <div class="step-card" id="card3">
+    <div class="step-header" onclick="toggleStep(3)">
+      <div class="step-icon">✅</div>
+      <div class="step-title">스스로 평가해봐!</div>
+      <div class="step-badge" id="badge3">STEP 3</div>
+    </div>
+    <div class="step-body hidden" id="body3">
+      <div class="eval-list" id="evalList"></div>
+      <div style="margin-top:16px">
+        <label style="font-size:13px;font-weight:700;color:var(--text-soft);display:block;margin-bottom:6px">💬 오늘 말하기 소감 (선택)</label>
+        <textarea id="evalComment" style="width:100%;border:2px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;resize:vertical;min-height:60px;font-family:inherit;outline:none;color:var(--text)" placeholder="오늘 어떠했어? 자유롭게 적어봐!"></textarea>
+      </div>
+      <button class="btn btn-blue btn-full btn-lg" onclick="getFeedback()" id="btnFeedback">
+        🤖 AI 피드백 받기
+      </button>
+      <button class="back-btn" onclick="goStep2()">← 다시 녹음하기</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: AI 피드백 -->
+  <div class="step-card" id="card4">
+    <div class="step-header" onclick="toggleStep(4)">
+      <div class="step-icon">🧠</div>
+      <div class="step-title">AI 피드백이 왔어!</div>
+      <div class="step-badge" id="badge4">STEP 4</div>
+    </div>
+    <div class="step-body hidden" id="body4">
+      <div id="feedbackContent">
+        <div style="text-align:center;padding:28px;color:var(--text-soft);font-size:14px">
+          STEP 3에서 자기평가 후 AI 피드백을 받아봐! 🌟
+        </div>
+      </div>
+      <div id="afterFeedback" style="display:none">
+        <button class="btn btn-blue btn-full" style="margin-top:14px" onclick="resetAll()">
+          🔄 새 주제로 다시 도전하기!
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────
+const FREE_TOPICS = [
+  {
+    emoji: '👋',
+    label: '자기소개\nMy name is...',
+    prompt: '자신에 대해 소개해봐! 이름, 나이, 좋아하는 것을 영어로 말해봐.',
+    sentences: [
+      'Hi! My name is ___.',
+      'I am ___ years old.',
+      'I like ___ very much.',
+      'My favorite ___ is ___.'
+    ],
+    goals: ['3문장 이상', '이름 + 나이', '좋아하는 것'],
+    keywords: ['My name is', 'I am', 'I like', 'My favorite']
+  },
+  {
+    emoji: '🍕',
+    label: '음식 / 좋아하는 것\nI like / I love...',
+    prompt: '좋아하는 음식이나 것들을 영어로 말해봐!',
+    sentences: [
+      'My favorite food is ___.',
+      'I love eating ___ because ___.',
+      'I don\'t like ___ very much.',
+      'I always eat ___ for breakfast / lunch / dinner.'
+    ],
+    goals: ['음식 이름', '이유 말하기', '3문장 이상'],
+    keywords: ['My favorite', 'I love', 'because', 'always']
+  },
+  {
+    emoji: '🎮',
+    label: '주말 / 취미\nOn weekends, I...',
+    prompt: '주말에 뭐 하는지 영어로 말해봐!',
+    sentences: [
+      'On weekends, I usually ___.',
+      'I like to ___ with my ___.',
+      'My hobby is ___.',
+      'I spend ___ hours ___ every week.'
+    ],
+    goals: ['주말 활동', '취미 설명', '시간 표현'],
+    keywords: ['On weekends', 'I usually', 'My hobby', 'spend time']
+  },
+  {
+    emoji: '🏫',
+    label: '학교생활\nMy favorite subject...',
+    prompt: '학교생활에 대해 영어로 말해봐! 좋아하는 과목이나 친구 이야기도 해봐.',
+    sentences: [
+      'My favorite subject is ___ because ___.',
+      'I go to ___ Elementary School.',
+      'I have ___ friends in my class.',
+      'After school, I ___.'
+    ],
+    goals: ['좋아하는 과목', '이유 말하기', '학교 활동'],
+    keywords: ['favorite subject', 'because', 'after school', 'friends']
+  },
+  {
+    emoji: '🚀',
+    label: '장래희망\nI want to be...',
+    prompt: '커서 뭐가 되고 싶은지 영어로 말해봐! 이유도 꼭 말해봐.',
+    sentences: [
+      'I want to be a ___ in the future.',
+      'I want to be a ___ because ___.',
+      'A ___ helps people ___.',
+      'To become a ___, I need to ___.'
+    ],
+    goals: ['직업 말하기', '이유 설명', '구체적 계획'],
+    keywords: ['I want to be', 'in the future', 'because', 'helps people']
+  },
+  {
+    emoji: '✈️',
+    label: '여행 / 가고 싶은 곳\nI want to go to...',
+    prompt: '가고 싶은 나라나 장소를 영어로 말해봐! 이유도 같이 말해봐.',
+    sentences: [
+      'I want to go to ___ someday.',
+      '___ is famous for ___.',
+      'I want to visit ___ because ___.',
+      'If I go to ___, I will ___.'
+    ],
+    goals: ['장소 이름', '이유 설명', 'because 사용'],
+    keywords: ['I want to go', 'famous for', 'because', 'If I go']
+  }
+];
+
+// 천재교육(이재근) 5학년 영어 — 단원별 복습 주제
+// 단원 제목은 디지털교과서 목차 기준. 핵심 표현은 일반적인 5학년 교육과정 기준으로 구성했으니,
+// 실제 수업 진도에 맞춰 example sentences는 선생님이 자유롭게 수정해서 쓰면 좋아요.
+const UNIT_TOPICS = [
+  {
+    unit: 'L1', badge: 'Lesson 1', semester: 1, emoji: '🌍',
+    label: 'Lesson 1\nWhere Are You From?',
+    prompt: '어느 나라에서 왔는지 영어로 소개해봐! 나라 이름과 함께 말해보자.',
+    sentences: ['Where are you from?', "I'm from Korea.", "I'm from ___.", 'Nice to meet you!'],
+    goals: ['나라 이름 말하기', "I'm from 사용", '인사 표현'],
+    keywords: ['Where are you from', "I'm from", 'Nice to meet you']
+  },
+  {
+    unit: 'L2', badge: 'Lesson 2', semester: 1, emoji: '📦',
+    label: 'Lesson 2\nWhat Are These?',
+    prompt: '주변 물건을 영어로 설명해봐! This is / These are를 사용해서 말해보자.',
+    sentences: ['What is this?', 'This is a ___.', 'What are these?', 'These are ___s.'],
+    goals: ['This/These 구별', '물건 이름', '3문장 이상'],
+    keywords: ['What is this', 'These are', 'This is']
+  },
+  {
+    unit: 'L3', badge: 'Lesson 3', semester: 1, emoji: '📸',
+    label: 'Lesson 3\nCan I Take Pictures?',
+    prompt: '허락을 구하는 표현을 영어로 말해봐! Can I ___? 를 사용해보자.',
+    sentences: ['Can I take pictures here?', 'Can I ___?', "Yes, you can. / No, you can't.", 'Thank you so much!'],
+    goals: ['Can I 사용', '허락 답하기', '장소 표현'],
+    keywords: ['Can I', 'Yes, you can', "No, you can't"]
+  },
+  {
+    unit: 'L4', badge: 'Lesson 4', semester: 1, emoji: '✏️',
+    label: 'Lesson 4\nWhose Pen Is This?',
+    prompt: '물건의 주인이 누구인지 영어로 묻고 답해봐!',
+    sentences: ['Whose pen is this?', "It's my pen.", "It's ___'s pen.", 'Whose ___ is this?'],
+    goals: ['Whose 질문', '소유격 사용', '물건 이름'],
+    keywords: ['Whose', "It's mine", "It's ___'s"]
+  },
+  {
+    unit: 'L5', badge: 'Lesson 5', semester: 1, emoji: '🛍️',
+    label: "Lesson 5\nLet's Go Shopping",
+    prompt: '쇼핑할 때 쓰는 표현을 영어로 말해봐! 가격을 묻고 답해보자.',
+    sentences: ['How much is it?', "It's ___ won.", 'Can I try this on?', "I'll take it!"],
+    goals: ['가격 묻기', '숫자 표현', '쇼핑 표현'],
+    keywords: ['How much', 'won', 'try this on']
+  },
+  {
+    unit: 'L6', badge: 'Lesson 6', semester: 1, emoji: '☀️',
+    label: 'Lesson 6\nWhat Will You Do This Summer?',
+    prompt: '이번 여름방학에 할 일을 영어로 말해봐! will을 사용해보자.',
+    sentences: ['What will you do this summer?', 'I will ___.', "I'm going to ___.", "I can't wait!"],
+    goals: ['will 사용', '여름 계획', '3문장 이상'],
+    keywords: ['What will you do', 'I will', 'this summer']
+  },
+  {
+    unit: 'R1', badge: 'Review 1', semester: 1, emoji: '🔁', review: true,
+    label: 'Review 1\n1~6과 복습',
+    prompt: '1~6과에서 배운 표현 중 2개 이상을 섞어서 자유롭게 말해봐! (예: 출신, 물건, 허락, 소유, 쇼핑, 여름 계획)',
+    sentences: ["I'm from ___, and this is my ___.", 'Can I ___? Whose ___ is this?', 'How much is it? I will buy it!'],
+    goals: ['표현 2개 이상 섞기', '자연스러운 연결', '자신감 있게 말하기'],
+    keywords: ["I'm from", 'Can I', 'How much', 'I will']
+  },
+  {
+    unit: 'L7', badge: 'Lesson 7', semester: 2, emoji: '🍉',
+    label: 'Lesson 7\nI Went to a Watermelon Festival',
+    prompt: '지난 방학에 다녀온 곳을 영어로 말해봐! 과거형(went, ate, saw)을 사용해보자.',
+    sentences: ['Where did you go?', 'I went to ___.', 'I ate ___. / I saw ___.', 'It was so much fun!'],
+    goals: ['과거형 사용', '장소/경험 말하기', '느낌 표현'],
+    keywords: ['I went to', 'I ate', 'It was fun']
+  },
+  {
+    unit: 'L8', badge: 'Lesson 8', semester: 2, emoji: '🍽️',
+    label: 'Lesson 8\nWhat Would You Like?',
+    prompt: '음식점에서 주문하는 표현을 영어로 말해봐!',
+    sentences: ['What would you like?', "I'd like ___, please.", 'Anything else?', "That's all, thank you."],
+    goals: ['주문 표현', '음식 이름', '공손한 표현'],
+    keywords: ["I'd like", 'please', 'Anything else']
+  },
+  {
+    unit: 'L9', badge: 'Lesson 9', semester: 2, emoji: '💰',
+    label: 'Lesson 9\nThey Are Twenty Thousand Won',
+    prompt: '물건 가격을 영어 숫자로 말해봐!',
+    sentences: ['How much are they?', 'They are ___ won.', "That's expensive! / That's cheap!", "I'll buy ___."],
+    goals: ['큰 숫자 표현', '복수형 가격 표현', '물건 이름'],
+    keywords: ['How much are they', 'won', 'expensive']
+  },
+  {
+    unit: 'L10', badge: 'Lesson 10', semester: 2, emoji: '⏰',
+    label: 'Lesson 10\nWhat Time Do You Get Up?',
+    prompt: '하루 일과를 영어로 시간과 함께 말해봐!',
+    sentences: ['What time do you get up?', 'I get up at ___.', 'I go to school at ___.', 'I go to bed at ___.'],
+    goals: ['시간 표현', '일과 동사', '3문장 이상'],
+    keywords: ['What time', 'I get up at', 'I go to bed']
+  },
+  {
+    unit: 'L11', badge: 'Lesson 11', semester: 2, emoji: '📚',
+    label: 'Lesson 11\nMy Favorite Subject Is Math',
+    prompt: '좋아하는 과목과 이유를 영어로 말해봐!',
+    sentences: ["What's your favorite subject?", 'My favorite subject is ___.', 'I like it because ___.', "It's interesting!"],
+    goals: ['과목 이름', '이유 설명', 'because 사용'],
+    keywords: ['favorite subject', 'because', "It's interesting"]
+  },
+  {
+    unit: 'L12', badge: 'Lesson 12', semester: 2, emoji: '🌟',
+    label: 'Lesson 12\nWhat Do You Want to Be?',
+    prompt: '미래에 되고 싶은 직업을 영어로 말해봐!',
+    sentences: ['What do you want to be?', 'I want to be a ___.', 'I want to be a ___ because ___.', 'I will work hard for my dream.'],
+    goals: ['직업 이름', '이유 설명', '다짐 표현'],
+    keywords: ['I want to be', 'because', 'dream']
+  },
+  {
+    unit: 'R2', badge: 'Review 2', semester: 2, emoji: '🔁', review: true,
+    label: 'Review 2\n7~12과 복습',
+    prompt: '7~12과에서 배운 표현 중 2개 이상을 섞어서 자유롭게 말해봐! (예: 과거 경험, 주문, 가격, 시간, 과목, 장래희망)',
+    sentences: ['I went to ___, and I ate ___.', "I'd like ___. It's ___ won.", 'I get up at ___, and I want to be a ___.'],
+    goals: ['표현 2개 이상 섞기', '자연스러운 연결', '자신감 있게 말하기'],
+    keywords: ['I went to', "I'd like", 'I want to be']
+  }
+];
+
+const EVAL_ITEMS = [
+  { id: 'confidence', label: '🗣️ 자신감', desc: '크고 자신 있게 말했나요?' },
+  { id: 'fluency',    label: '🌊 유창성',  desc: '끊기지 않고 자연스럽게 말했나요?' },
+  { id: 'accuracy',  label: '✏️ 정확성',  desc: '올바른 문법과 단어를 사용했나요?' },
+  { id: 'content',   label: '📖 내용',    desc: '예시 문장을 참고하고 충분히 말했나요?' }
+];
+
+const SCORE_LABELS = ['', '아직 어려워요', '조금 됐어요', '보통이에요', '잘 됐어요', '아주 잘 됐어요!'];
+
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+let S = {
+  mode: 'free',
+  topicIdx: -1,
+  recordings: [],
+  attemptCount: 0,
+  scores: {},
+  transcript: '',
+  mediaRecorder: null,
+  isRecording: false,
+  timerInterval: null,
+  timerSec: 0,
+  recognition: null,
+  audioBlob: null,
+  currentStep: 1
+};
+
+function currentList() {
+  return S.mode === 'unit' ? UNIT_TOPICS : FREE_TOPICS;
+}
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+window.onload = () => {
+  renderTopics();
+  renderUnits();
+  renderEvalItems();
+  openStep(1);
+  // URL key param
+  const p = new URLSearchParams(location.search);
+  if (p.get('key')) document.getElementById('apiKey').value = p.get('key');
+};
+
+function renderTopics() {
+  const grid = document.getElementById('topicGrid');
+  grid.innerHTML = FREE_TOPICS.map((t,i) => `
+    <button class="topic-chip" onclick="selectTopic(${i})">
+      <span class="t-emoji">${t.emoji}</span>
+      ${t.label.replace('\n','<br>')}
+    </button>
+  `).join('');
+}
+
+function renderUnits() {
+  const grid = document.getElementById('unitGrid');
+  const sem1 = UNIT_TOPICS.filter(u => u.semester === 1);
+  const sem2 = UNIT_TOPICS.filter(u => u.semester === 2);
+
+  const chip = (u) => {
+    const idx = UNIT_TOPICS.indexOf(u);
+    const [title, sub] = u.label.split('\n');
+    return `
+      <button class="unit-chip${u.review ? ' review' : ''}" onclick="selectTopic(${idx})">
+        <span class="u-badge">${u.badge}</span>
+        <span><span class="u-emoji">${u.emoji}</span> ${sub}</span>
+      </button>`;
+  };
+
+  grid.innerHTML = `
+    <div style="grid-column:1/-1" class="unit-semester-label">1학기 (Lesson 1~6)</div>
+    ${sem1.map(chip).join('')}
+    <div style="grid-column:1/-1" class="unit-semester-label">2학기 (Lesson 7~12)</div>
+    ${sem2.map(chip).join('')}
+  `;
+}
+
+function setMode(mode) {
+  if (S.mode === mode) return;
+  S.mode = mode;
+  S.topicIdx = -1;
+  document.getElementById('modeBtnFree').classList.toggle('active', mode === 'free');
+  document.getElementById('modeBtnUnit').classList.toggle('active', mode === 'unit');
+  document.getElementById('topicGrid').style.display = mode === 'free' ? 'grid' : 'none';
+  document.getElementById('unitGrid').style.display = mode === 'unit' ? 'grid' : 'none';
+  document.querySelectorAll('.topic-chip.selected, .unit-chip.selected').forEach(c => c.classList.remove('selected'));
+  document.getElementById('exampleBox').classList.remove('show');
+  document.getElementById('exLabel').textContent = mode === 'unit' ? '📘 오늘의 교과서 복습 과제' : '🎯 오늘의 말하기 과제';
+  document.getElementById('btn1').disabled = true;
+}
+
+// ─────────────────────────────────────────
+// STEPS
+// ─────────────────────────────────────────
+function openStep(n) {
+  for (let i=1; i<=4; i++) {
+    const body = document.getElementById('body'+i);
+    if (body) body.classList.toggle('hidden', i !== n);
+  }
+  S.currentStep = n;
+}
+
+function toggleStep(n) {
+  const body = document.getElementById('body'+n);
+  if (body) body.classList.toggle('hidden');
+}
+
+function goStep1() {
+  openStep(1);
+  document.getElementById('body1').classList.remove('hidden');
+}
+
+function goStep2() {
+  if (S.topicIdx < 0) { toast('주제를 먼저 골라봐! 🗂️'); return; }
+  openStep(2);
+}
+
+function goStep3() {
+  if (!S.audioBlob) { toast('먼저 말하기를 해봐! 🎤'); return; }
+  openStep(3);
+}
+
+// ─────────────────────────────────────────
+// TOPIC
+// ─────────────────────────────────────────
+function selectTopic(idx) {
+  S.topicIdx = idx;
+  const selector = S.mode === 'unit' ? '.unit-chip' : '.topic-chip';
+  document.querySelectorAll(selector).forEach((c,i) =>
+    c.classList.toggle('selected', i===idx));
+
+  const t = currentList()[idx];
+  document.getElementById('exPrompt').textContent = t.prompt;
+  document.getElementById('exSentences').innerHTML = t.sentences
+    .map(s => `<div class="example-sentence">💬 ${s}</div>`).join('');
+  document.getElementById('goalChips').innerHTML = t.goals
+    .map(g => `<span class="goal-chip">✓ ${g}</span>`).join('');
+  document.getElementById('exampleBox').classList.add('show');
+  document.getElementById('btn1').disabled = false;
+}
+
+// ─────────────────────────────────────────
+// RECORDING
+// ─────────────────────────────────────────
+async function toggleRec() {
+  if (S.isRecording) stopRec();
+  else await startRec();
+}
+
+async function startRec() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    S.isRecording = true;
+    S.timerSec = 0;
+
+    // MediaRecorder
+    const chunks = [];
+    S.mediaRecorder = new MediaRecorder(stream);
+    S.mediaRecorder.ondataavailable = e => chunks.push(e.data);
+    S.mediaRecorder.onstop = () => {
+      S.audioBlob = new Blob(chunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(S.audioBlob);
+      document.getElementById('audioPlayer').src = url;
+      document.getElementById('audioSection').classList.add('show');
+      S.attemptCount = Math.min(S.attemptCount + 1, 3);
+      updateDots();
+    };
+    S.mediaRecorder.start();
+
+    // Timer
+    S.timerInterval = setInterval(() => {
+      S.timerSec++;
+      const m = String(Math.floor(S.timerSec/60)).padStart(2,'0');
+      const s = String(S.timerSec%60).padStart(2,'0');
+      document.getElementById('recTimer').textContent = m+':'+s;
+    }, 1000);
+
+    // UI
+    const btn = document.getElementById('recBtn');
+    btn.textContent = '⏹';
+    btn.classList.add('on');
+    document.getElementById('recHint').textContent = '말하는 중... 끝나면 다시 눌러봐! ⏹';
+    document.getElementById('transcriptArea').innerHTML = '<span class="t-placeholder">인식 중... 🎤</span>';
+    document.getElementById('audioSection').classList.remove('show');
+
+    // Speech Recognition
+    startSR();
+  } catch(e) {
+    toast('마이크 권한이 필요해요! 🎤 설정에서 허용해줘.');
+  }
+}
+
+function stopRec() {
+  if (S.recognition) { try { S.recognition.stop(); } catch(e){} }
+  if (S.mediaRecorder?.state !== 'inactive') {
+    S.mediaRecorder.stop();
+    S.mediaRecorder.stream.getTracks().forEach(t => t.stop());
+  }
+  clearInterval(S.timerInterval);
+  S.isRecording = false;
+
+  const btn = document.getElementById('recBtn');
+  btn.textContent = '🎤';
+  btn.classList.remove('on');
+  document.getElementById('recHint').textContent = '잘했어! 녹음을 들어보고 다음 단계로 가봐! 🎉';
+}
+
+function startSR() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  S.recognition = new SR();
+  S.recognition.lang = 'en-US';
+  S.recognition.continuous = true;
+  S.recognition.interimResults = true;
+  S.transcript = '';
+
+  S.recognition.onresult = e => {
+    let final = '', interim = '';
+    for (let i=0; i<e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
+      else interim += e.results[i][0].transcript;
+    }
+    S.transcript = final.trim();
+    document.getElementById('transcriptArea').innerHTML =
+      (final ? `<span>${final}</span>` : '') +
+      (interim ? `<span style="color:#A0AEC0">${interim}</span>` : '');
+  };
+  S.recognition.onerror = () => {};
+  S.recognition.start();
+}
+
+function retryRec() {
+  S.audioBlob = null;
+  S.transcript = '';
+  clearInterval(S.timerInterval);
+  S.timerSec = 0;
+  S.isRecording = false;
+  document.getElementById('recTimer').textContent = '00:00';
+  document.getElementById('recBtn').textContent = '🎤';
+  document.getElementById('recBtn').classList.remove('on');
+  document.getElementById('recHint').textContent = '버튼을 누르고 영어로 말해봐! 🗣️';
+  document.getElementById('transcriptArea').innerHTML = '<span class="t-placeholder">여기에 네가 말한 내용이 나타날 거야 ✨</span>';
+  document.getElementById('audioSection').classList.remove('show');
+}
+
+function updateDots() {
+  for(let i=1;i<=3;i++) {
+    document.getElementById('d'+i).classList.toggle('done', i <= S.attemptCount);
+  }
+}
+
+// ─────────────────────────────────────────
+// EVAL
+// ─────────────────────────────────────────
+function setScore(id, val) {
+  S.scores[id] = val;
+  for(let v=1;v<=5;v++) {
+    const star = document.getElementById(`star-${id}-${v}`);
+    if (star) star.classList.toggle('on', v <= val);
+  }
+  document.getElementById(`slabel-${id}`).textContent = SCORE_LABELS[val];
+}
+
+function renderEvalItems() {
+  const list = document.getElementById('evalList');
+  EVAL_ITEMS.forEach(item => { S.scores[item.id] = 0; });
+  list.innerHTML = EVAL_ITEMS.map(item => `
+    <div class="eval-item">
+      <div class="eval-item-header">
+        <div>
+          <div class="eval-item-label">${item.label}</div>
+          <div class="eval-item-desc">${item.desc}</div>
+        </div>
+        <div class="score-label" id="slabel-${item.id}">—</div>
+      </div>
+      <div class="stars" id="stars-${item.id}">
+        ${[1,2,3,4,5].map(v =>
+          `<button class="star" id="star-${item.id}-${v}" onclick="setScore('${item.id}',${v})">⭐</button>`
+        ).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─────────────────────────────────────────
+// AI FEEDBACK
+// ─────────────────────────────────────────
+async function getFeedback() {
+  const allDone = EVAL_ITEMS.every(item => S.scores[item.id] > 0);
+  if (!allDone) { toast('모든 항목을 별로 평가해봐! ⭐'); return; }
+
+  openStep(4);
+  document.getElementById('body4').classList.remove('hidden');
+
+  const content = document.getElementById('feedbackContent');
+  content.innerHTML = `<div class="ai-loading"><div class="spinner"></div>AI가 열심히 분석 중이야... 잠깐만 기다려봐! 🤖</div>`;
+  document.getElementById('afterFeedback').style.display = 'none';
+
+  const topic = currentList()[S.topicIdx];
+  const comment = document.getElementById('evalComment').value.trim();
+  const avgScore = (Object.values(S.scores).reduce((a,b)=>a+b,0) / EVAL_ITEMS.length).toFixed(1);
+  const scoreDetail = EVAL_ITEMS.map(item => `${item.label}: ${S.scores[item.id]}/5`).join(', ');
+
+  const systemPrompt = `You are an enthusiastic, warm, and encouraging English speech coach for Korean 5th graders (age 11). 
+Your feedback is specific, actionable, and age-appropriate. You always celebrate effort first, then guide improvement.
+Respond ONLY in this exact format with these section headers:
+
+SCORE: [integer 0-100]
+GOOD: [2-3 specific things the student did well — be concrete, mention actual phrases or efforts]
+IMPROVE: [1-2 specific improvements with HOW to improve — give exact example sentences]
+PHRASES: [exactly 3 useful English expressions for this topic, format: "English phrase" — Korean meaning]
+NEXT: [one specific challenge for their next attempt — make it exciting!]
+CHEER: [one enthusiastic encouraging sentence in Korean — make it warm and personal]`;
+
+  const userPrompt = `Student's speaking practice:
+Topic: ${topic.emoji} ${topic.label.replace('\n',' — ')}
+Task prompt: ${topic.prompt}
+What student said: "${S.transcript || '(음성 텍스트 인식 없음 — 발화 시도는 했으나 텍스트 미확인)'}"
+Practice attempts: ${S.attemptCount} time(s)
+Self-evaluation: ${scoreDetail} (average: ${avgScore}/5)
+Student's comment: "${comment || 'none'}"
+Duration: ${S.timerSec} seconds`;
+
+  const apiKey = document.getElementById('apiKey').value.trim();
+
+  try {
+    let feedbackText = '';
+
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userPrompt }]
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(()=>({}));
+        throw new Error(err.error?.message || `API 오류 (${res.status})`);
+      }
+      const data = await res.json();
+      feedbackText = data.content?.[0]?.text || '';
+    } else {
+      // Demo mode
+      await new Promise(r => setTimeout(r, 1600));
+      feedbackText = `SCORE: 72
+GOOD: 영어로 말하려는 용기가 정말 대단해요! 특히 "${topic.keywords?.[0] || 'I'}" 표현을 사용해서 말하려고 노력한 점이 훌륭해요. ${S.timerSec > 10 ? `${S.timerSec}초 동안 말을 이어간 것도 훌륭해요!` : '짧지만 집중해서 말한 점도 좋아요!'}
+IMPROVE: 문장을 조금 더 길게 말해봐요. 예를 들어 "I like pizza." 대신 "I like pizza because it's very delicious." 처럼 이유를 붙여봐요! 또한 말하기 전에 주제 키워드를 먼저 생각해두면 더 자신 있게 말할 수 있어요.
+PHRASES: "I really like ___." — 저는 정말 ___를 좋아해요 / "My favorite ___ is ___." — 제가 가장 좋아하는 ___는 ___예요 / "Because it's ___." — 왜냐하면 ___이기 때문이에요
+NEXT: 다음엔 이유를 꼭 "because"로 설명해봐요! "I want to be a doctor because I want to help people." 처럼요.
+CHEER: 오늘 정말 잘했어요! 영어로 말하는 게 어렵지만 포기하지 않는 네가 정말 자랑스러워요! 💪🌟`;
+    }
+
+    renderFeedback(feedbackText, avgScore);
+  } catch(e) {
+    content.innerHTML = `
+      <div style="text-align:center;padding:24px;color:#E53E3E">
+        <div style="font-size:36px;margin-bottom:10px">😢</div>
+        <div style="font-weight:700;margin-bottom:8px">피드백을 가져오지 못했어요</div>
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:16px">${e.message}</div>
+        <button class="btn btn-blue" style="width:auto;padding:10px 20px" onclick="getFeedback()">다시 시도</button>
+      </div>`;
+  }
+}
+
+function renderFeedback(text, avgScore) {
+  const parse = key => {
+    const m = text.match(new RegExp(`${key}:\\s*([\\s\\S]*?)(?=\\n[A-Z]+:|$)`));
+    return m ? m[1].trim() : '';
+  };
+
+  const score = parseInt(parse('SCORE')) || Math.round(parseFloat(avgScore)*20);
+  const good    = parse('GOOD');
+  const improve = parse('IMPROVE');
+  const phrases = parse('PHRASES');
+  const next    = parse('NEXT');
+  const cheer   = parse('CHEER');
+
+  const phraseItems = phrases.split('/').filter(p=>p.trim()).map(p => {
+    const parts = p.trim().split('—');
+    return `<span class="ai-phrase">${parts[0].replace(/"/g,'').trim()} ${parts[1] ? '— '+parts[1].trim() : ''}</span>`;
+  }).join('');
+
+  const barW = Math.min(score, 100);
+  const scoreColor = score >= 80 ? '#276749' : score >= 60 ? '#2B6CB0' : '#744210';
+
+  document.getElementById('feedbackContent').innerHTML = `
+    <div class="ai-bubble">
+      <div class="ai-score-row">
+        <div class="ai-score-big" style="color:${scoreColor}">${score}</div>
+        <div class="ai-score-info">
+          <div class="ai-score-label">오늘의 스피치 점수</div>
+          <div class="ai-score-bar-wrap">
+            <div class="ai-score-bar" style="width:0%" id="scoreBar"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-soft);margin-top:4px">
+            ${score >= 80 ? '🌟 훌륭해요!' : score >= 60 ? '👍 잘 하고 있어요!' : '💪 조금 더 도전해봐!'}
+          </div>
+        </div>
+      </div>
+
+      ${good ? `<div class="ai-section">
+        <div class="ai-section-title good">✅ 잘한 점</div>
+        <div class="ai-section-body">${good}</div>
+      </div>` : ''}
+
+      ${improve ? `<div class="ai-section">
+        <div class="ai-section-title improve">💡 이렇게 하면 더 좋아요</div>
+        <div class="ai-section-body">${improve}</div>
+      </div>` : ''}
+
+      ${phraseItems ? `<div class="ai-section">
+        <div class="ai-section-title phrase">📝 이 표현을 써봐!</div>
+        <div class="ai-phrase-row">${phraseItems}</div>
+      </div>` : ''}
+
+      ${next ? `<div class="ai-section">
+        <div class="ai-section-title" style="color:#2B6CB0">🚀 다음 도전</div>
+        <div class="ai-section-body">${next}</div>
+      </div>` : ''}
+
+      ${cheer ? `<div class="ai-cheer-box">🌟 ${cheer}</div>` : ''}
+    </div>
+  `;
+
+  // Animate bar
+  setTimeout(() => {
+    const bar = document.getElementById('scoreBar');
+    if (bar) bar.style.width = barW + '%';
+  }, 100);
+
+  document.getElementById('afterFeedback').style.display = 'block';
+}
+
+// ─────────────────────────────────────────
+// RESET
+// ─────────────────────────────────────────
+function resetAll() {
+  S.topicIdx = -1;
+  S.audioBlob = null;
+  S.transcript = '';
+  S.attemptCount = 0;
+  S.timerSec = 0;
+  clearInterval(S.timerInterval);
+  S.isRecording = false;
+
+  renderTopics();
+  renderUnits();
+  renderEvalItems();
+  document.getElementById('evalComment').value = '';
+  document.getElementById('recTimer').textContent = '00:00';
+  document.getElementById('recBtn').textContent = '🎤';
+  document.getElementById('recBtn').classList.remove('on');
+  document.getElementById('recHint').textContent = '버튼을 누르고 영어로 말해봐! 🗣️';
+  document.getElementById('transcriptArea').innerHTML = '<span class="t-placeholder">여기에 네가 말한 내용이 나타날 거야 ✨</span>';
+  document.getElementById('audioSection').classList.remove('show');
+  document.getElementById('exampleBox').classList.remove('show');
+  document.getElementById('btn1').disabled = true;
+  updateDots();
+  document.getElementById('feedbackContent').innerHTML = `
+    <div style="text-align:center;padding:28px;color:var(--text-soft);font-size:14px">
+      STEP 3에서 자기평가 후 AI 피드백을 받아봐! 🌟
+    </div>`;
+  document.getElementById('afterFeedback').style.display = 'none';
+  openStep(1);
+  document.getElementById('body1').classList.remove('hidden');
+}
+
+// ─────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
