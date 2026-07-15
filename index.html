@@ -852,7 +852,6 @@ function saveApiKey(){
   setTimeout(()=>{document.getElementById('apiModal').classList.remove('open');toast('🔑 API 키가 저장됐어요!');},700);
 }
 function closeApiModal(){document.getElementById('apiModal').classList.remove('open');if(!localStorage.getItem('talktalk_apikey'))toast('⚠️ API 키 미설정 — 예시 피드백으로 작동해요.');}
-function openApiSetting(){ openTeacherSettings(); } 
 
 // TALK 모형
 function setTalkStep(n){
@@ -963,10 +962,20 @@ function selectTopic(idx){
   }catch(e){console.error('selectTopic error:',e);}
 }
 
-// 녹음 시작 및 마이크 연동
+// 마이크 세션 관리 및 비동기 순차 시작 구현 (녹음 + 문자 변환 완벽 통합)
 async function toggleRec(){if(S.isRecording)stopRec();else await startRec();}
 async function startRec(){
   try{
+    // 이전 마이크 인스턴스가 돌고 있다면 완벽히 릴리즈
+    if(S.mediaRecorder && S.mediaRecorder.state !== 'inactive') {
+      try { S.mediaRecorder.stop(); } catch(e){}
+    }
+    if(S.recognition) {
+      try { S.recognition.abort(); } catch(e){}
+      S.recognition = null;
+    }
+
+    // 마이크 스트림 가져오기
     if(!sharedStream||sharedStream.getTracks().some(t=>t.readyState==='ended')){
       sharedStream=await navigator.mediaDevices.getUserMedia({audio:true});
     }
@@ -979,10 +988,14 @@ async function startRec(){
     document.getElementById('transcriptArea').innerHTML='<span class="tp">인식 중... 🎤</span>';
     document.getElementById('audioSection').classList.remove('show');
     
-    // 안전한 모바일/PC 통합 STT 초기화 및 구동
+    // [핵심 변경] 녹음과 음성인식을 동시에 시작할 때, 자원 충돌을 막기 위해 음성인식(STT)을 우선 가동합니다.
     startSR();
     
-    await new Promise(r=>setTimeout(r,200));
+    // STT 세션 확보 후 250ms의 시간적 마진을 주고 미디어 레코더를 기동하여 안드로이드/갤럭시탭 마이크 자원 충돌 방지
+    await new Promise(r=>setTimeout(r,250));
+    
+    if(!S.isRecording) return; // 중간에 취소된 경우 예방
+    
     const chunks=[];
     const mimeType=MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':
       MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':'';
@@ -1045,7 +1058,7 @@ function stopRec(){
   },400);
 }
 
-// 최적화된 STT 엔진 설계 (Attempt 단계)
+// [핵심 해결] 녹음 마이크 선점 방어 코드가 적용된 STT 엔진
 function startSR(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){
@@ -1056,8 +1069,6 @@ function startSR(){
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
   const recognition = new SR();
   recognition.lang='en-US';
-  
-  // 모바일 환경의 경우 continuous 속성은 불필요한 끊김을 만드므로 분리 대응
   recognition.continuous = !isIOS;
   recognition.interimResults = true;
   recognition.maxAlternatives = 1;
@@ -1088,19 +1099,27 @@ function startSR(){
       (interimSpeech ? '<span style="color:#A0AEC0"> ' + interimSpeech + '</span>' : '');
   };
   
+  // 마이크 녹음기 작동으로 인해 인식기가 강제로 죽는 경우를 방지하기 위해 자동 재가동 메커니즘 보강
   recognition.onerror = e => {
-    if(e.error === 'not-allowed') {
-      toast('마이크 권한을 허용해야 스피치 인식이 시작됩니다.');
+    console.warn("STT Error Event: ", e.error);
+    // 'aborted' 또는 'network' 등으로 인해 STT가 갑작스럽게 꺼질 때, 녹음이 실행 중이면 즉시 다시 살려냅니다.
+    if (S.isRecording && e.error !== 'not-allowed') {
+      setTimeout(() => {
+        if(S.isRecording) {
+          try { recognition.start(); } catch(err){}
+        }
+      }, 100);
     }
-    console.warn("STT Error: " + e.error);
   };
   
   recognition.onend = () => {
-    // 세션 유지 및 iOS 루프 중단을 없애기 위해 안전 세션 검증 후 필요시 제한적으로 재가동
+    // MediaRecorder 가동에 의해 마이크가 끊기더라도 녹음 중이라면 루프를 돌려 강제 재연결을 확보합니다.
     if (S.isRecording) {
-      try {
-        recognition.start();
-      } catch(err) {}
+      setTimeout(() => {
+        if(S.isRecording) {
+          try { recognition.start(); } catch(err) {}
+        }
+      }, 80);
     }
   };
   
@@ -1108,7 +1127,7 @@ function startSR(){
     recognition.start();
     S.recognition = recognition;
   }catch(e){
-    console.error("STT Start Error: ", e);
+    console.error("STT Bootup Error: ", e);
   }
 }
 
@@ -1250,10 +1269,15 @@ async function askAI(){
   }
 }
 
-// AI 대화용 STT 제어
+// AI 대화용 STT 제어 (자원 선점 차단 적용)
 function toggleConvRec(){if(convRecording)stopConvRec();else startConvRec();}
 async function startConvRec(){
   try{
+    if(convRecognition) {
+      try { convRecognition.abort(); } catch(e){}
+      convRecognition = null;
+    }
+
     if(!sharedStream||sharedStream.getTracks().some(t=>t.readyState==='ended')){
       sharedStream=await navigator.mediaDevices.getUserMedia({audio:true});
     }
@@ -1266,10 +1290,14 @@ async function startConvRec(){
     document.getElementById('convBtnRow').style.display='none';
     document.getElementById('convTranscriptArea').innerHTML='<span class="tp">인식 중... 🎤</span>';
     
-    // AI 대화 인식용 STT
+    // AI 대화 인식용 STT 기동
     startConvSR();
     
-    await new Promise(res=>setTimeout(res,200));
+    // 마이크 스트림 충돌을 막기 위해 250ms의 시간 차를 두어 기동
+    await new Promise(res=>setTimeout(res,250));
+    
+    if(!convRecording) return;
+    
     const mimeType=MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':
       MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':'';
     const chunks=[];
@@ -1311,13 +1339,22 @@ function startConvSR() {
   
   recognition.onerror = e => {
     console.warn("Conv STT Error: " + e.error);
+    if (convRecording && e.error !== 'not-allowed') {
+      setTimeout(() => {
+        if(convRecording) {
+          try { recognition.start(); } catch(err){}
+        }
+      }, 100);
+    }
   };
   
   recognition.onend = () => {
     if (convRecording) {
-      try {
-        recognition.start();
-      } catch(err) {}
+      setTimeout(() => {
+        if(convRecording) {
+          try { recognition.start(); } catch(err) {}
+        }
+      }, 80);
     }
   };
   
@@ -1682,13 +1719,22 @@ function startRpRec(){
   
   recognition.onerror = e => {
     console.warn("RP STT Error: " + e.error);
+    if (rpRecording && e.error !== 'not-allowed') {
+      setTimeout(() => {
+        if(rpRecording) {
+          try { recognition.start(); } catch(err){}
+        }
+      }, 100);
+    }
   };
   
   recognition.onend = () => {
     if (rpRecording) {
-      try {
-        recognition.start();
-      } catch(err) {}
+      setTimeout(() => {
+        if(rpRecording) {
+          try { recognition.start(); } catch(err) {}
+        }
+      }, 80);
     }
   };
   
